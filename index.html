@@ -3,35 +3,343 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CollegeAI Chat</title>
+  <title>Chat</title>
   <style>
-    body { font-family: Arial; background: #222; color: #eee; padding: 20px; }
-    textarea, button { width: 100%; margin-top: 10px; font-size: 1rem; }
-    textarea { padding: 10px; border-radius: 5px; resize: vertical; }
-    button { padding: 10px; background: #0ea5e9; border: none; border-radius: 5px; color: white; cursor: pointer; }
-    .response { margin-top: 20px; background: #333; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-textarea: #334155;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --border-color: #475569;
+      --accent-color: #38bdf8;
+      --accent-gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+    }
+
+    :root[data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-textarea: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #cbd5e1;
+      --accent-color: #0284c7;
+      --accent-gradient: linear-gradient(135deg, #0284c7, #6366f1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body { 
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      gap: 1.5rem;
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .theme-toggle {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-color);
+    }
+
+    .theme-toggle svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    .input-group {
+      background: var(--bg-secondary);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-color);
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--bg-textarea);
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 100px;
+      transition: all 0.2s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    button {
+      width: 100%;
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .response {
+      background: var(--bg-secondary);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      line-height: 1.7;
+      border-left: 4px solid var(--accent-color);
+      margin-top: 1.5rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .character {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 2rem;
+      background: var(--bg-secondary);
+      border-radius: 60%;
+      padding: 20px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    .character-face {
+      font-size: 4rem;
+      transition: all 0.5s ease;
+    }
+
+    /* Face animations */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    .character.happy .character-face {
+      animation: bounce 1s ease infinite;
+    }
+
+    .character.angry .character-face {
+      animation: shake 0.5s ease infinite;
+    }
+
+    .character.sad .character-face {
+      transform: translateY(5px);
+    }
+
+    .character.thinking .character-face {
+      animation: bounce 2s ease infinite;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .input-group {
+        padding: 1rem;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>AI Assistant</h1>
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <span>Toggle Theme</span>
+      </button>
+    </div>
 
-  <h1>CollegeAI Chat</h1>
+    <div class="character">
+      <div class="character-face">😊</div>
+    </div>
+    
+    <div class="input-group">
+      <label>System Prompt</label>
+      <textarea id="systemPrompt" rows="2">You are a helpful AI assistant.</textarea>
 
-  <label>System Prompt:</label>
-  <textarea id="systemPrompt" rows="2">You are a helpful AI assistant.</textarea>
+      <label>Your Message</label>
+      <textarea id="userPrompt" placeholder="Type your question here..."></textarea>
 
-  <label>User Prompt:</label>
-  <textarea id="userPrompt" rows="4" placeholder="Type your question here..."></textarea>
+      <button onclick="sendMessage()">Send Message</button>
+    </div>
 
-  <button onclick="sendMessage()">Send</button>
-
-  <div class="response" id="response">Response will appear here...</div>
+    <div class="response" id="response">Response will appear here...</div>
+  </div>
 
   <script>
+    // Theme toggle functionality
+    function toggleTheme() {
+      const root = document.documentElement;
+      const currentTheme = root.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', newTheme);
+      
+      // Save theme preference
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Load saved theme preference
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    // Load theme on page load
+    loadTheme();
+
+    // Sentiment analysis function
+    function analyzeSentiment(text) {
+      // Simple sentiment analysis based on keywords
+      const sentiments = {
+        happy: ['thank', 'great', 'awesome', 'excellent', 'good', 'love', 'wonderful', 'perfect', '😊', '👍', 'happy'],
+        sad: ['sorry', 'sad', 'unfortunate', 'bad', 'terrible', 'wrong', 'error', '😢', '😔', 'disappointed'],
+        angry: ['angry', 'furious', 'mad', 'terrible', 'worst', 'hate', 'awful', '😠', '😡', 'frustrated'],
+        thinking: ['how', 'what', 'why', 'when', 'where', 'explain', 'help', 'could', 'would', '🤔']
+      };
+
+      text = text.toLowerCase();
+      
+      // Check each sentiment category
+      for (let [sentiment, keywords] of Object.entries(sentiments)) {
+        if (keywords.some(keyword => text.includes(keyword))) {
+          return sentiment;
+        }
+      }
+      
+      return 'happy'; // Default sentiment
+    }
+
+    // Update character expression
+    function updateCharacterMood(sentiment) {
+      const character = document.querySelector('.character');
+      const face = document.querySelector('.character-face');
+      
+      // Remove all mood classes
+      character.classList.remove('happy', 'sad', 'angry', 'thinking');
+      
+      // Add new mood class and update emoji
+      character.classList.add(sentiment);
+      
+      // Update emoji based on sentiment
+      const emojis = {
+        happy: '😊',
+        sad: '😔',
+        angry: '😠',
+        thinking: '🤔'
+      };
+      
+      face.textContent = emojis[sentiment];
+    }
+
+    // Modified sendMessage function
     async function sendMessage() {
       const systemPrompt = document.getElementById("systemPrompt").value;
       const userPrompt = document.getElementById("userPrompt").value;
       const responseDiv = document.getElementById("response");
 
+      // Update character to thinking state while waiting for response
+      updateCharacterMood('thinking');
       responseDiv.textContent = "Loading...";
 
       try {
@@ -42,11 +350,15 @@
         });
         const data = await res.json();
         responseDiv.textContent = data.reply || "No response.";
+        
+        // Analyze sentiment of the response and update character
+        const sentiment = analyzeSentiment(data.reply || '');
+        updateCharacterMood(sentiment);
       } catch (err) {
         responseDiv.textContent = "Error: " + err.message;
+        updateCharacterMood('sad'); // Show sad face on error
       }
     }
   </script>
-
 </body>
 </html>
