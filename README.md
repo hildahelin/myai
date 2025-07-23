@@ -1,4 +1,4 @@
-# AI Chat Assistant
+# My AI
 
 A modern chat interface featuring an AI assistant that responds with dynamic emoji expressions based on the conversation's emotional tone. The application includes dark/light theme support and a clean, responsive design for an engaging user experience.
 
